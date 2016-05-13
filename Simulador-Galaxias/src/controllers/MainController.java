@@ -17,7 +17,7 @@ public class MainController {
 	@FXML private AnchorPane canvasPane;
 	@FXML private VBox editPanel;
 	
-	@FXML private TextField posXField, posYField, velXField, velYField, massField;
+	@FXML private TextField posXField, posYField, velXField, velYField, massField, nameField;
 	
 	@FXML private ListView<Particle> particleListView;
 	
@@ -66,6 +66,13 @@ public class MainController {
 				selectedParticle.setMass(Double.parseDouble(newValue));
 		});
 		
+		nameField.textProperty().addListener((observable, oldValue, newValue) -> {
+			if (selectedParticle != null) {
+				selectedParticle.setName(newValue);
+				particleListView.refresh();
+			}
+		});
+		
 	}
 	
 	private void configureDoubleField(TextField field, boolean negative) {
@@ -102,6 +109,8 @@ public class MainController {
 		if (selectedParticle == null)
 			return;
 		
+		nameField.setText(selectedParticle.getName());
+		
 		posXField.setText(""+selectedParticle.getPositionX());
 		posYField.setText(""+selectedParticle.getPositionY());
 		velXField.setText(""+selectedParticle.getVelocityX());
@@ -119,7 +128,7 @@ public class MainController {
 	
 	@FXML
 	private void createParticle() {
-		selectedParticle = new Particle();
+		selectedParticle = new Particle("Particle " + (particles.size() + 1));
 		particles.add(selectedParticle);
 		
 		particleListView.getSelectionModel().select(selectedParticle);
@@ -134,6 +143,35 @@ public class MainController {
 		
 		particles.remove(selectedParticle);
 		updateEditingPane();
+	}
+
+	// =========================================
+	// Menu Items
+	// =========================================
+	
+	@FXML
+	private void openFile() {
+		System.out.println("open file");
+	}
+	
+	@FXML
+	private void saveFile() {
+		
+	}
+	
+	@FXML
+	private void newFile() {
+		
+	}
+	
+	@FXML
+	private void exit() {
+		
+	}
+	
+	@FXML 
+	private void startSimulation() {
+		
 	}
 	
 }

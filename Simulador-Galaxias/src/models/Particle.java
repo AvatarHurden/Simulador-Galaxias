@@ -6,14 +6,24 @@ import javafx.geometry.Point2D;
 
 public class Particle {
 
+	private String name;
 	private double mass;
 	private Point2D position, velocity;
 
-	public Particle() {
+	public Particle(String name) {
+		
+		this.name = name;
 		
 		position = new Point2D(0, 0);
 		velocity = new Point2D(0, 0);
-		
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
 	}
 	
 	public double getMass() {
@@ -54,6 +64,10 @@ public class Particle {
 
 	public void setVelocityX(double X) {
 		velocity = new Point2D(X, velocity.getY());
+	}
+	
+	public String toString() {
+		return name;
 	}
 	
 }
