@@ -1,12 +1,13 @@
 package models;
 
-import java.awt.Point;
-
 import javafx.geometry.Point2D;
+import javafx.scene.paint.Color;
 
 public class Particle {
 
 	private String name;
+	private Color color;
+	
 	private double mass;
 	private Point2D position, velocity;
 
@@ -24,6 +25,14 @@ public class Particle {
 	
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public Color getColor() {
+		return color;
+	}
+	
+	public void setColor(Color color) {
+		this.color = color;
 	}
 	
 	public double getMass() {
