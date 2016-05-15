@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckMenuItem?>
 <?import javafx.scene.control.ColorPicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
@@ -21,25 +22,42 @@
    <children>
       <MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <menus>
-          <Menu mnemonicParsing="false" text="Arquivo">
+          <Menu mnemonicParsing="false" text="File">
             <items>
-                  <MenuItem mnemonicParsing="false" text="Novo" />
-                  <MenuItem mnemonicParsing="false" onAction="#openFile" text="Abrir">
+                  <MenuItem mnemonicParsing="false" text="New" />
+                  <MenuItem mnemonicParsing="false" onAction="#openFile" text="Open">
                      <accelerator>
                         <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                      </accelerator>
                   </MenuItem>
-                  <MenuItem mnemonicParsing="false" text="Salvar" />
-              <MenuItem mnemonicParsing="false" text="Sair" />
+                  <MenuItem mnemonicParsing="false" text="Save" />
+              <MenuItem mnemonicParsing="false" text="Quit" />
             </items>
           </Menu>
-          <Menu mnemonicParsing="false" text="Simulação">
+          <Menu mnemonicParsing="false" text="Simulation">
             <items>
-              <MenuItem mnemonicParsing="false" text="Começar" />
-                  <MenuItem mnemonicParsing="false" text="Pausar" />
-                  <MenuItem mnemonicParsing="false" text="Resetar" />
+                  <MenuItem mnemonicParsing="false" text="Step" />
+              <MenuItem mnemonicParsing="false" text="Start" />
+                  <MenuItem mnemonicParsing="false" text="Pause" />
+                  <MenuItem mnemonicParsing="false" text="Reset" />
             </items>
           </Menu>
+            <Menu mnemonicParsing="false" text="View">
+              <items>
+                  <CheckMenuItem mnemonicParsing="false" onAction="#toggleGridVisibility" selected="true" text="Grid">
+                     <accelerator>
+                        <KeyCodeCombination alt="UP" code="DIGIT1" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                     </accelerator></CheckMenuItem>
+                  <CheckMenuItem mnemonicParsing="false" onAction="#toggleVectorVisibility" selected="true" text="Velocity Vectors">
+                     <accelerator>
+                        <KeyCodeCombination alt="UP" code="DIGIT2" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                     </accelerator></CheckMenuItem>
+                  <CheckMenuItem disable="true" mnemonicParsing="false" text="Gravity Fields" visible="false">
+                     <accelerator>
+                        <KeyCodeCombination alt="UP" code="DIGIT3" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                     </accelerator></CheckMenuItem>
+              </items>
+            </Menu>
           <Menu mnemonicParsing="false" text="Help">
             <items>
               <MenuItem mnemonicParsing="false" text="About" />
@@ -94,7 +112,7 @@
       </SplitPane>
       <AnchorPane fx:id="canvasPane" onMouseEntered="#enteredAnchor" style="-fx-background-color: #101030;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="200.0" AnchorPane.topAnchor="25.0">
          <children>
-            <Canvas fx:id="canvas" onMouseDragged="#mouseDraggedCanvas" onMouseEntered="#mouseEnteredCanvas" onMousePressed="#mousePressedCanvas" onScroll="#scrolledCanvas" scaleY="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            <Canvas fx:id="canvas" onMouseDragged="#mouseDraggedCanvas" onMouseMoved="#mouseMovedCanvas" onMousePressed="#mousePressedCanvas" onScroll="#scrolledCanvas" scaleY="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
             <Slider fx:id="zoomSlider" layoutX="14.0" layoutY="46.0" orientation="VERTICAL" prefHeight="330.0" prefWidth="14.0" AnchorPane.bottomAnchor="46.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="46.0" />
          </children>
       </AnchorPane>
