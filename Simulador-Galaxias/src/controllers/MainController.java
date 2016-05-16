@@ -247,11 +247,13 @@ public class MainController {
 	
 	private void drawVelocityVector(GraphicsContext gc, Particle p) {
 		double radius = 1 + p.getMass() / 100;
-
-		double x1 = p.getPositionX(), x2 = x1 + p.getVelocityX();
-		double y1 = p.getPositionY(), y2 = y1 + p.getVelocityY();
-
-	    gc.setLineWidth(0.1 * radius);
+		
+		double arctan = Math.atan2( p.getVelocityY(), p.getVelocityX() );
+		
+		double x1 = p.getPositionX() + (radius/2) *  Math.cos(arctan), x2 = x1 + p.getVelocityX();
+		double y1 = p.getPositionY() + (radius/2) *  Math.sin(arctan), y2 = y1 + p.getVelocityY();
+		
+	    gc.setLineWidth(0.05 * radius);
 	    gc.setLineCap(StrokeLineCap.ROUND);
 	    gc.strokeLine(x1, y1, x2, y2);
 	    
@@ -259,21 +261,31 @@ public class MainController {
 		    gc.setLineWidth(1);
 			return;
 	    }
+	    
 
-		double phi= Math.toRadians(40);
-		double barb = 1;
-		double dx = x2 - x1;
-        double dy = y2 - y1;
-        double theta = Math.atan2( dy, dx );
-        double x, y, rho = theta + phi;
+		
+		double x[] = {0,0,0};
+		double y[] = {0,0,0};
+        x[0] = x2 + 0.10 * radius * Math.cos(arctan);
+        y[0] = y2 + 0.10 * radius * Math.sin(arctan);
         
-        x = x2 - barb * Math.cos( rho );
-        y = y2 - barb * Math.sin( rho );
-        gc.strokeLine(x2, y2, x, y);
+        double phi = 1;
+		double dx = x[0] - x1;
+        double dy = y[0] - y1;
+
+        double barb = Math.max(1, radius/10);
+        double theta = Math.atan2( dy, dx );
+        double rho = theta + phi;
+        
+        x[1] = x2 - barb * Math.cos( rho );
+        y[1] = y2 - barb * Math.sin( rho );
+        //gc.strokeLine(x2, y2, x, y);
         rho = theta - phi;
-        x = x2 - barb * Math.cos( rho );
-        y = y2 - barb * Math.sin( rho );
-        gc.strokeLine(x2, y2, x, y);
+        x[2] = x2 - barb * Math.cos( rho );
+        y[2] = y2 - barb * Math.sin( rho );
+        //gc.strokeLine(x2, y2, x, y);
+        
+        gc.fillPolygon(x,y,3);
 	    gc.setLineWidth(1);
 	    
 	}
