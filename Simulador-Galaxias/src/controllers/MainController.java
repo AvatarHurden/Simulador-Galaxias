@@ -263,21 +263,20 @@ public class MainController {
 	    }
 	    
 
-		
 		double x[] = {0,0,0};
 		double y[] = {0,0,0};
         x[0] = x2 + 0.10 * radius * Math.cos(arctan);
         y[0] = y2 + 0.10 * radius * Math.sin(arctan);
-        
+        System.out.println(0.10 * radius);
         double phi = 1;
 		double dx = x[0] - x1;
         double dy = y[0] - y1;
-
-        double barb = Math.max(1, radius/10);
+        double size = Math.sqrt(dx*dx+dy*dy);
+        double barb = Math.min(Math.max(1, radius/10),	size/3);
         double theta = Math.atan2( dy, dx );
         double rho = theta + phi;
         
-        x[1] = x2 - barb * Math.cos( rho );
+        x[1] = x2 - barb * Math.cos( rho );	
         y[1] = y2 - barb * Math.sin( rho );
         //gc.strokeLine(x2, y2, x, y);
         rho = theta - phi;
@@ -286,7 +285,7 @@ public class MainController {
         //gc.strokeLine(x2, y2, x, y);
         
         gc.fillPolygon(x,y,3);
-	    gc.setLineWidth(1);
+	    gc.setLineWidth(1);	
 	    
 	}
 	
