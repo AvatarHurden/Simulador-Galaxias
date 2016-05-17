@@ -14,6 +14,7 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
@@ -262,7 +263,10 @@ public class MainController {
 			return;
 	    }
 	    
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 		double x[] = {0,0,0};
 		double y[] = {0,0,0};
         x[0] = x2 + 0.10 * radius * Math.cos(arctan);
@@ -300,13 +304,42 @@ public class MainController {
 	}
 	
 	@FXML
+	private void mouseClickedCanvas(MouseEvent evt) {
+		if (evt.getButton() != MouseButton.PRIMARY)
+			return;
+		
+		double x = evt.getX();
+		double y = evt.getY();
+		Affine t = canvas.getGraphicsContext2D().getTransform();
+		
+		selectedParticle = new Particle("Particle " + (particles.size() + 1));
+		selectedParticle.setPositionX((x - t.getTx())/zoom);
+		selectedParticle.setPositionY((y - t.getTy())/zoom);
+		
+		Random rand = new Random();
+		selectedParticle.setColor(Color.rgb(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255)));
+		
+		particles.add(selectedParticle);
+		
+		particleListView.getSelectionModel().select(selectedParticle);
+		updateEditingPane();
+		drawParticles();
+	}
+	
+	@FXML
 	private void mousePressedCanvas(MouseEvent evt) {
+		if (evt.getButton() != MouseButton.SECONDARY)
+			return;
+		
 		dragLastX = evt.getX();
 		dragLastY = evt.getY();
 	}
 	
 	@FXML
 	private void mouseDraggedCanvas(MouseEvent evt) {
+		if (evt.getButton() != MouseButton.SECONDARY)
+			return;
+		
 		dragAmountX += evt.getX() - dragLastX;
 		dragAmountY += evt.getY() - dragLastY;
 
@@ -322,7 +355,32 @@ public class MainController {
 	
 	@FXML
 	private void scrolledCanvas(ScrollEvent evt) {
+		
+		double x = evt.getX();
+		double y = evt.getY();
+		Affine t = canvas.getGraphicsContext2D().getTransform();
+		
+		double oldX = (x - t.getTx())/zoom;
+		double oldY = (y - t.getTy())/zoom;
+		
 		zoomSlider.setValue(zoomSlider.getValue() + evt.getDeltaY() / 40);
+
+		t = canvas.getGraphicsContext2D().getTransform();
+		double newX = (x - t.getTx())/zoom;
+		double newY = (y - t.getTy())/zoom;
+		
+		System.out.println(oldX + " " + oldY);
+		System.out.println(newX + " " + newY);
+		
+		dragAmountX += (-oldX + newX) * zoom;
+		dragAmountY += (-oldY + newY) * zoom;
+
+		Affine transform = new Affine();
+		transform.setTx(-oldX + newX);
+		transform.setTy(-oldY + newY);
+		canvas.getGraphicsContext2D().transform(transform);
+		
+        drawParticles();
 	}
 	
 	@FXML

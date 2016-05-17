@@ -112,7 +112,7 @@
       </SplitPane>
       <AnchorPane fx:id="canvasPane" onMouseEntered="#enteredAnchor" style="-fx-background-color: #101030;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="200.0" AnchorPane.topAnchor="25.0">
          <children>
-            <Canvas fx:id="canvas" onMouseDragged="#mouseDraggedCanvas" onMouseMoved="#mouseMovedCanvas" onMousePressed="#mousePressedCanvas" onScroll="#scrolledCanvas" scaleY="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            <Canvas fx:id="canvas" onMouseClicked="#mouseClickedCanvas" onMouseDragged="#mouseDraggedCanvas" onMouseMoved="#mouseMovedCanvas" onMousePressed="#mousePressedCanvas" onScroll="#scrolledCanvas" scaleY="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
             <Slider fx:id="zoomSlider" layoutX="14.0" layoutY="46.0" orientation="VERTICAL" prefHeight="330.0" prefWidth="14.0" AnchorPane.bottomAnchor="46.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="46.0" />
          </children>
       </AnchorPane>
