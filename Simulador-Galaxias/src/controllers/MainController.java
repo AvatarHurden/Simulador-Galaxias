@@ -263,10 +263,6 @@ public class MainController {
 			return;
 	    }
 	    
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 		double x[] = {0,0,0};
 		double y[] = {0,0,0};
         x[0] = x2 + 0.10 * radius * Math.cos(arctan);
