@@ -1,23 +1,8 @@
 package controllers;
 
-//import java.io.BufferedWriter;
-//import java.io.FileWriter;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Random;
-
-import org.json.JSONArray;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import java.io.File;
 
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
@@ -37,9 +22,14 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.transform.Affine;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import models.Particle;
+import models.Simulation;
 
 public class MainController {
+	
+	private Simulation simulation;
 	
 	@FXML private AnchorPane canvasPane;
 	@FXML private VBox editPanel;
@@ -48,8 +38,6 @@ public class MainController {
 	@FXML private ColorPicker colorSelector;
 	
 	@FXML private ListView<Particle> particleListView;
-	
-	private ObservableList<Particle> particles;
 	private Particle selectedParticle;
 
 	@FXML private Canvas canvas;
@@ -64,9 +52,9 @@ public class MainController {
 	@FXML
 	private void initialize() {
 		
-		particles = FXCollections.observableArrayList();
+		simulation = new Simulation();
 		
-		particleListView.setItems(particles);
+		particleListView.setItems(simulation.getParticles());
 		particleListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 			selectedParticle = newValue;
 			updateEditingPane();
@@ -221,7 +209,7 @@ public class MainController {
 		if (showGrid)
 			drawGrid();
 		
-		for (Particle p : particles) {
+		for (Particle p : simulation.getParticles()) {
 			gc.setFill(p.getColor());
 			gc.setStroke(p.getColor());
 			double radius = 1 + p.getMass() / 100;
@@ -241,8 +229,8 @@ public class MainController {
 		
 		double leftLimit = (-width / 2 - dragAmountX) / zoom;
 		double rightLimit = (width / 2 - dragAmountX) / zoom;
-		double bottomLimit = (height / 2 - dragAmountY) / zoom;
-		double topLimit = (-height / 2 - dragAmountY) / zoom;
+		double bottomLimit = (-height / 2 - dragAmountY) / zoom;
+		double topLimit = (height / 2 - dragAmountY) / zoom;
 		
 		gc.setStroke(Paint.valueOf("#303050"));
 		gc.setLineWidth(1 / zoom);
@@ -256,6 +244,17 @@ public class MainController {
 			gc.strokeLine(amount, topLimit, amount, bottomLimit);
 			gc.strokeLine(leftLimit, amount, rightLimit, amount);
 		}
+		
+		double rightXEnd = rightLimit - 30;
+		double rightYEnd = bottomLimit + 30;
+		
+		gc.setFill(Color.valueOf("#101030").deriveColor(0, 1, 20, 0.7));
+//		gc.fillRect(rightXEnd - 50, rightYEnd - 5, 50, 20);
+		//gc.setLineWidth(20);
+		gc.setStroke(Color.WHITESMOKE);
+		gc.strokeLine(rightXEnd - 40, rightYEnd, rightXEnd - 40, rightYEnd + 5);
+		gc.strokeLine(rightXEnd, rightYEnd, rightXEnd, rightYEnd + 5);
+		gc.strokeLine(rightXEnd - 40, rightYEnd, rightXEnd, rightYEnd);
 		
 	}
 	
@@ -321,17 +320,9 @@ public class MainController {
 		double y = evt.getY();
 		Affine t = canvas.getGraphicsContext2D().getTransform();
 		
-		selectedParticle = new Particle("Particle " + (particles.size() + 1));
-		selectedParticle.setPositionX((x - t.getTx())/zoom);
-		selectedParticle.setPositionY((y - t.getTy())/zoom);
-		
-		Random rand = new Random();
-		selectedParticle.setColor(Color.rgb(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255)));
-		
-		particles.add(selectedParticle);
-		
+		selectedParticle = simulation.createNewParticle((x - t.getTx())/zoom, (y - t.getTy())/zoom);
+				
 		particleListView.getSelectionModel().select(selectedParticle);
-		updateEditingPane();
 		drawParticles();
 	}
 	
@@ -394,26 +385,18 @@ public class MainController {
 	
 	@FXML
 	private void createParticle() {
-		selectedParticle = new Particle("Particle " + (particles.size() + 1));
-		
-		Random rand = new Random();
-		selectedParticle.setColor(Color.rgb(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255)));
-		
-		particles.add(selectedParticle);
+		selectedParticle = simulation.createNewParticle(0, 0);
 		
 		particleListView.getSelectionModel().select(selectedParticle);
-		updateEditingPane();
 		drawParticles();
 	}
 	
 	@FXML
 	private void deleteSelected() {
-		System.out.println("hi");
 		if (selectedParticle == null)
 			return;
 		
-		particles.remove(selectedParticle);
-		updateEditingPane();
+		simulation.getParticles().remove(selectedParticle);
 	}
 
 	// =========================================
@@ -422,62 +405,36 @@ public class MainController {
 
 	@FXML
 	private void openFile() {
-		System.out.println("open file");
-		particles.clear();
 		
-		String text="";
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Open Simulation File");
+		fileChooser.setInitialDirectory(new File(System.getProperty("user.dir"))); 
+		fileChooser.getExtensionFilters().add(new ExtensionFilter("Simulations", "*.nbody"));
 		
-		try {
-			BufferedReader input = new BufferedReader(new FileReader("save.txt"));
-			StringBuilder sb = new StringBuilder();
-		    String line = input.readLine();
+		File f = fileChooser.showOpenDialog(canvas.getScene().getWindow());
+		
+		if (f != null)
+			simulation.loadFile(f);
 
-		    while (line != null) {
-		        sb.append(line);
-		        line = input.readLine();
-		    }
-		    text = sb.toString();
-		    
-		    input.close();
-		    
-		}
-		catch (IOException e){
-			e.printStackTrace();	
-		}
-		
-//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA DAQUI PRA BAIXO TA ME DEIXANDO MALUCO
-		System.out.println("1");
-		ArrayList<Particle> yourArray = new Gson().fromJson(text, new TypeToken<ArrayList<Particle>>(){}.getType());
-		System.out.println("2");
-		particles.setAll(yourArray);
-		System.out.println("3");
 		drawParticles();
-		System.out.println("4");
-		
-
 	}
 	
 	@FXML
 	private void saveFile() {
-		System.out.println("save file");
-		if(particles.isEmpty()) {
-			return;
+		
+		File f = simulation.getSourceFile();
+		
+		if (f == null) {
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle("Save Simulation File");
+			fileChooser.setInitialDirectory(new File(System.getProperty("user.dir"))); 
+			fileChooser.getExtensionFilters().add(new ExtensionFilter("Simulations", "*.nbody"));
+			
+			f = fileChooser.showSaveDialog(canvas.getScene().getWindow());
 		}
 		
-		JSONArray JSONArray = new JSONArray(particles);
-		
-		System.out.println(JSONArray);
-		
-		String text = JSONArray.toString();
-		try {
-			BufferedWriter output = new BufferedWriter(new FileWriter("save.txt"));
-			output.write(text);
-			output.close();	
-		}
-		catch (IOException e){
-			e.printStackTrace();	
-		}
-
+		if (f != null)
+			simulation.saveFile(f);
 		
 	}
 	

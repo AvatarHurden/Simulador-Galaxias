@@ -6,7 +6,9 @@ import javafx.scene.paint.Color;
 public class Particle {
 
 	private String name;
-	private Color color;
+	
+	private transient Color color;
+	private String colorValue;
 	
 	private double mass;
 	private Point2D position, velocity;
@@ -28,11 +30,14 @@ public class Particle {
 	}
 	
 	public Color getColor() {
+		if (color == null)
+			color = Color.valueOf(colorValue);
 		return color;
 	}
 	
 	public void setColor(Color color) {
 		this.color = color;
+		colorValue = color.toString();
 	}
 	
 	public double getMass() {
