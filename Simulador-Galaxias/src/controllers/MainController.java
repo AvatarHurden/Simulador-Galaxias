@@ -1,6 +1,19 @@
 package controllers;
 
+//import java.io.BufferedWriter;
+//import java.io.FileWriter;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Random;
+
+import org.json.JSONArray;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -406,14 +419,65 @@ public class MainController {
 	// =========================================
 	// Menu Items
 	// =========================================
-	
+
 	@FXML
 	private void openFile() {
 		System.out.println("open file");
+		particles.clear();
+		
+		String text="";
+		
+		try {
+			BufferedReader input = new BufferedReader(new FileReader("save.txt"));
+			StringBuilder sb = new StringBuilder();
+		    String line = input.readLine();
+
+		    while (line != null) {
+		        sb.append(line);
+		        line = input.readLine();
+		    }
+		    text = sb.toString();
+		    
+		    input.close();
+		    
+		}
+		catch (IOException e){
+			e.printStackTrace();	
+		}
+		
+//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA DAQUI PRA BAIXO TA ME DEIXANDO MALUCO
+		System.out.println("1");
+		ArrayList<Particle> yourArray = new Gson().fromJson(text, new TypeToken<ArrayList<Particle>>(){}.getType());
+		System.out.println("2");
+		particles.setAll(yourArray);
+		System.out.println("3");
+		drawParticles();
+		System.out.println("4");
+		
+
 	}
 	
 	@FXML
 	private void saveFile() {
+		System.out.println("save file");
+		if(particles.isEmpty()) {
+			return;
+		}
+		
+		JSONArray JSONArray = new JSONArray(particles);
+		
+		System.out.println(JSONArray);
+		
+		String text = JSONArray.toString();
+		try {
+			BufferedWriter output = new BufferedWriter(new FileWriter("save.txt"));
+			output.write(text);
+			output.close();	
+		}
+		catch (IOException e){
+			e.printStackTrace();	
+		}
+
 		
 	}
 	
