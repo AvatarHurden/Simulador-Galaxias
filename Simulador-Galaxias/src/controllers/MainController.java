@@ -158,7 +158,6 @@ public class MainController {
 						return;
 	                Double.parseDouble(newValue);
 				} catch (NumberFormatException exc) {
-					System.out.println(exc);
 					((StringProperty) observable).setValue(oldValue);
 				}
 			});
@@ -170,7 +169,6 @@ public class MainController {
 					return;
                 Double.parseDouble(newValue);
 			} catch (NumberFormatException exc) {
-				System.out.println(exc);
 				((StringProperty) observable).setValue(oldValue);
 			}
 		});
@@ -191,7 +189,6 @@ public class MainController {
 		velYField.setText(""+selectedParticle.getVelocityY());
 		
 		massField.setText(""+selectedParticle.getMass());
-		
 	}
 	
 	private void drawParticles() {
@@ -232,29 +229,36 @@ public class MainController {
 		double bottomLimit = (-height / 2 - dragAmountY) / zoom;
 		double topLimit = (height / 2 - dragAmountY) / zoom;
 		
+		double actualWidth = width / zoom;
+		double step = 1;
+		if (Math.round(actualWidth / step) > 20)
+			while (Math.round(actualWidth / step) > 20)
+				step *= 2;
+		else 
+			while (Math.round(actualWidth / step) < 20)
+				step /= 2;
+		
 		gc.setStroke(Paint.valueOf("#303050"));
 		gc.setLineWidth(1 / zoom);
-		int distance = 300;
-		int divider = (int) width / 80;
-		while (distance > width / zoom / divider)
-			distance /= 2;
-		int lines = (int) width / distance * divider;
+		int lines = (int) (actualWidth / step);
+		int deslocX = (int) Math.ceil(dragAmountX / zoom / step);
+		int deslocY = (int) Math.ceil(dragAmountY / zoom / step);
+		
 		for (int i = -lines; i < lines; i++) {
-			double amount = i * distance;
+			double amount = (i - deslocX) * step;
 			gc.strokeLine(amount, topLimit, amount, bottomLimit);
+			amount = (i - deslocY) * step;
 			gc.strokeLine(leftLimit, amount, rightLimit, amount);
 		}
 		
-		double rightXEnd = rightLimit - 30;
-		double rightYEnd = bottomLimit + 30;
-		
+		double scaleXStart = rightLimit - 30 / zoom;
+		double scaleYStart = bottomLimit + 30 / zoom;
+		double scaleWidth = step , scaleHeight = 5 / zoom;
 		gc.setFill(Color.valueOf("#101030").deriveColor(0, 1, 20, 0.7));
-//		gc.fillRect(rightXEnd - 50, rightYEnd - 5, 50, 20);
-		//gc.setLineWidth(20);
 		gc.setStroke(Color.WHITESMOKE);
-		gc.strokeLine(rightXEnd - 40, rightYEnd, rightXEnd - 40, rightYEnd + 5);
-		gc.strokeLine(rightXEnd, rightYEnd, rightXEnd, rightYEnd + 5);
-		gc.strokeLine(rightXEnd - 40, rightYEnd, rightXEnd, rightYEnd);
+		gc.strokeLine(scaleXStart - scaleWidth, scaleYStart, scaleXStart - scaleWidth, scaleYStart + scaleHeight);
+		gc.strokeLine(scaleXStart, scaleYStart, scaleXStart, scaleYStart + scaleHeight);
+		gc.strokeLine(scaleXStart - scaleWidth, scaleYStart, scaleXStart, scaleYStart);
 		
 	}
 	
@@ -279,7 +283,6 @@ public class MainController {
 		double y[] = {0,0,0};
         x[0] = x2 + 0.10 * radius * Math.cos(arctan);
         y[0] = y2 + 0.10 * radius * Math.sin(arctan);
-        System.out.println(0.10 * radius);
         double phi = 1;
 		double dx = x[0] - x1;
         double dy = y[0] - y1;
@@ -308,7 +311,6 @@ public class MainController {
 	
 	@FXML
 	private void enteredAnchor() {
-		System.out.println("hi2");
 	}
 	
 	@FXML
@@ -326,6 +328,8 @@ public class MainController {
 				
 		selectedParticle = simulation.createNewParticle((x - t.getTx())/zoom, (y - t.getTy())/zoom);
 				
+		System.out.println(selectedParticle.getPositionX() + " " + selectedParticle.getPositionY());
+		
 		particleListView.getSelectionModel().select(selectedParticle);
 		drawParticles();
 		particleListView.scrollTo(selectedParticle);
@@ -405,9 +409,6 @@ public class MainController {
 		double newX = (x - t.getTx())/zoom;
 		double newY = (y - t.getTy())/zoom;
 		
-		System.out.println(oldX + " " + oldY);
-		System.out.println(newX + " " + newY);
-		
 		dragAmountX += (-oldX + newX) * zoom;
 		dragAmountY += (-oldY + newY) * zoom;
 
@@ -445,6 +446,7 @@ public class MainController {
 			return;
 		
 		simulation.getParticles().remove(selectedParticle);
+		drawParticles();
 	}
 
 	// =========================================

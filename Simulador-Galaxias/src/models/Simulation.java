@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Random;
 
@@ -64,18 +63,9 @@ public class Simulation {
 	
 	public void loadFile(File f) {
 		try (FileReader freader = new FileReader(f)) {
-			
-			Type token = new TypeToken<List<Particle>>(){}.getType();
-			
 			JsonReader reader = new JsonReader(freader);
-			List<Particle> list = new Gson().fromJson(reader, token);
+			List<Particle> list = new Gson().fromJson(reader, new TypeToken<List<Particle>>(){}.getType());
 			
-			System.out.println(list);
-//			for (Particle p : list) {
-//				System.out.println(p.getColor().getClass().getName());
-//				particles.add(p);
-//			}
-//				System.out.println(p.getColor().getRed());
 			particles.setAll(list);
 			sourceFile = f;
 		} catch (Exception e){
