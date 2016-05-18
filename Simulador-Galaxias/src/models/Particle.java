@@ -84,4 +84,11 @@ public class Particle {
 		return name;
 	}
 	
+	public boolean hasPoint (double x, double y) {
+		double radius = (1 + getMass() / 100)/2;
+		
+		double distance = Math.sqrt((getPositionX() - x) * (getPositionX() - x) + (getPositionY() - y) * (getPositionY() - y));
+		
+		return distance <= radius;
+	}
 }

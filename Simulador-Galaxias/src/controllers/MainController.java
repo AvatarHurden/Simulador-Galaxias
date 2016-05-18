@@ -320,37 +320,73 @@ public class MainController {
 		double y = evt.getY();
 		Affine t = canvas.getGraphicsContext2D().getTransform();
 		
+		Particle p = mouseOnParticle(x,y);
+		if (p != null) 
+			return;
+				
 		selectedParticle = simulation.createNewParticle((x - t.getTx())/zoom, (y - t.getTy())/zoom);
 				
 		particleListView.getSelectionModel().select(selectedParticle);
 		drawParticles();
+		particleListView.scrollTo(selectedParticle);
 	}
 	
 	@FXML
 	private void mousePressedCanvas(MouseEvent evt) {
-		if (evt.getButton() != MouseButton.SECONDARY)
+		if (evt.getButton() != MouseButton.SECONDARY && evt.getButton() != MouseButton.PRIMARY)
 			return;
-		
-		dragLastX = evt.getX();
-		dragLastY = evt.getY();
+		if (evt.getButton() == MouseButton.PRIMARY) {
+			
+			double x = evt.getX();
+			double y = evt.getY();
+			
+			Particle p = mouseOnParticle(x,y);
+			if (p != null) {
+				selectedParticle = p;
+				updateEditingPane();
+				particleListView.refresh();
+				particleListView.getSelectionModel().select(selectedParticle);
+				particleListView.scrollTo(selectedParticle);
+				return;
+			}
+			
+		}
+		if (evt.getButton() == MouseButton.SECONDARY) {
+			dragLastX = evt.getX();
+			dragLastY = evt.getY();
+		}
 	}
 	
 	@FXML
 	private void mouseDraggedCanvas(MouseEvent evt) {
-		if (evt.getButton() != MouseButton.SECONDARY)
+		if (evt.getButton() != MouseButton.SECONDARY && evt.getButton() != MouseButton.PRIMARY)
 			return;
 		
-		dragAmountX += evt.getX() - dragLastX;
-		dragAmountY += evt.getY() - dragLastY;
-
-		Affine t = new Affine();
-		t.setTx((evt.getX() - dragLastX) / zoom);
-		t.setTy((evt.getY() - dragLastY) / zoom);
-		canvas.getGraphicsContext2D().transform(t);
-		drawParticles();
+		double x = evt.getX();
+		double y = evt.getY();
+		Affine a = canvas.getGraphicsContext2D().getTransform();
 		
-		dragLastX = evt.getX();
-		dragLastY = evt.getY();
+		if (evt.getButton() == MouseButton.PRIMARY) {
+			selectedParticle.setPositionX((x - a.getTx())/zoom);
+			selectedParticle.setPositionY((y - a.getTy())/zoom);
+			drawParticles();
+			particleListView.refresh();
+		}
+		
+		if (evt.getButton() == MouseButton.SECONDARY) {
+			dragAmountX += evt.getX() - dragLastX;
+			dragAmountY += evt.getY() - dragLastY;
+			
+			Affine t = new Affine();
+			t.setTx((evt.getX() - dragLastX) / zoom);
+			t.setTy((evt.getY() - dragLastY) / zoom);
+			
+			canvas.getGraphicsContext2D().transform(t);
+			drawParticles();
+			
+			dragLastX = evt.getX();
+			dragLastY = evt.getY();
+		}
 	}
 	
 	@FXML
@@ -381,6 +417,18 @@ public class MainController {
 		canvas.getGraphicsContext2D().transform(transform);
 		
         drawParticles();
+	}
+	
+	private Particle mouseOnParticle(double x, double y) {
+		if (simulation.getParticles().isEmpty())
+			return null;
+		Affine t = canvas.getGraphicsContext2D().getTransform();
+
+		for (Particle p : simulation.getParticles()) 
+			if (p.hasPoint((x - t.getTx())/zoom, (y - t.getTy())/zoom)) 
+				return p;
+		
+		return null;
 	}
 	
 	@FXML

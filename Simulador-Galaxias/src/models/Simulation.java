@@ -82,7 +82,7 @@ public class Simulation {
 			e.printStackTrace();	
 		}
 		
-	}
+	}	
 	
 	public void saveFile(File f) {
 		
