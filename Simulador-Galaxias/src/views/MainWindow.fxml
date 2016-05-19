@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.canvas.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.input.*?>
-<?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Button?>
@@ -25,7 +19,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="600.0" prefHeight="476.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="600.0" prefHeight="476.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
    <children>
       <MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <menus>
@@ -122,8 +116,9 @@
       </SplitPane>
       <AnchorPane fx:id="canvasPane" onMouseEntered="#enteredAnchor" style="-fx-background-color: #101030;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0">
          <children>
-            <Canvas fx:id="canvas" onMouseClicked="#mouseClickedCanvas" onMouseDragged="#mouseDraggedCanvas" onMouseMoved="#mouseMovedCanvas" onMousePressed="#mousePressedCanvas" onScroll="#scrolledCanvas" scaleY="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            <Canvas fx:id="canvas" onMouseClicked="#mouseClickedCanvas" onMouseDragged="#mouseDraggedCanvas" onMouseExited="#mouseExitedCanvas" onMouseMoved="#mouseMovedCanvas" onMousePressed="#mousePressedCanvas" onScroll="#scrolledCanvas" scaleY="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
             <Slider fx:id="zoomSlider" layoutX="14.0" layoutY="46.0" orientation="VERTICAL" prefHeight="330.0" prefWidth="14.0" AnchorPane.bottomAnchor="46.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="46.0" />
+            <Label fx:id="positionLabel" layoutX="14.0" layoutY="385.0" textFill="WHITESMOKE" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" />
          </children>
       </AnchorPane>
       <HBox alignment="CENTER_LEFT" layoutX="200.0" layoutY="25.0" prefHeight="35.0" prefWidth="400.0" spacing="10.0" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">

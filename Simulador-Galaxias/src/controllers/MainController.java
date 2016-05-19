@@ -9,6 +9,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
@@ -41,7 +42,7 @@ public class MainController {
 	private Particle selectedParticle;
 
 	@FXML private Canvas canvas;
-	
+	@FXML private Label positionLabel;
 	@FXML private Slider zoomSlider;
 	
 	private double zoom = 1;
@@ -267,29 +268,10 @@ public class MainController {
 	}
 	
 	private void drawPosition(double x, double y) {
-	
 		Affine t = canvas.getGraphicsContext2D().getTransform();
-		
 		String text = String.format("%.2f %.2f", (x - t.getTx())/zoom, (y - t.getTy())/zoom);
 		
-		GraphicsContext gc = canvas.getGraphicsContext2D();
-		Affine inverted = new Affine(t);
-		inverted.setMyy(-1);
-		inverted.setMxx(1);
-		gc.setTransform(inverted);
-
-		double leftLimit = - t.getTx() / 1;
-		double topLimit = ( - t.getTy()) / 1;
-		
-		double scaleXStart = leftLimit + 30 / 1;
-		double scaleYStart = topLimit + 30 / 1;
-		
-		gc.clearRect(scaleXStart, scaleYStart - 20/1, 100/1, 20/1);
-		gc.setFill(Color.WHITESMOKE);
-		System.out.println(scaleXStart + " " + scaleYStart);
-		gc.fillText(text, scaleXStart, scaleYStart);
-		gc.setTransform(t);
-		
+		positionLabel.setText(text);
 	}
 	
 	private void drawVelocityVector(GraphicsContext gc, Particle p) {
@@ -340,6 +322,11 @@ public class MainController {
 	}
 	
 	@FXML
+	private void mouseExitedCanvas(MouseEvent evt) {
+		positionLabel.setText("");
+	}
+	
+	@FXML
 	private void enteredAnchor() {
 	}
 	
@@ -357,10 +344,10 @@ public class MainController {
 			return;
 				
 		selectedParticle = simulation.createNewParticle((x - t.getTx())/zoom, (y - t.getTy())/zoom);
-				
+
 		particleListView.getSelectionModel().select(selectedParticle);
 		drawCanvas();
-		particleListView.scrollTo(selectedParticle);
+		drawPosition(x, y);
 	}
 	
 	@FXML
@@ -391,24 +378,21 @@ public class MainController {
 		Affine a = canvas.getGraphicsContext2D().getTransform();
 		
 		if (evt.getButton() == MouseButton.PRIMARY && isDragging) {
-			selectedParticle.setPositionX((x - a.getTx())/zoom);
-			selectedParticle.setPositionY((y - a.getTy())/zoom);
-			drawCanvas();
+			posXField.setText(""+(x - a.getTx())/zoom);
+			posYField.setText(""+(y - a.getTy())/zoom);
 			particleListView.refresh();
-		}
-		
-		if (evt.getButton() == MouseButton.SECONDARY) {
+		} else if (evt.getButton() == MouseButton.SECONDARY) {
 			
 			Affine t = new Affine();
 			t.setTx((evt.getX() - dragLastX) / zoom);
 			t.setTy((evt.getY() - dragLastY) / zoom);
 			canvas.getGraphicsContext2D().transform(t);
 			
-			drawCanvas();
-			
 			dragLastX = evt.getX();
 			dragLastY = evt.getY();
 		}
+		drawCanvas();
+		drawPosition(x, y);
 	}
 	
 	@FXML
@@ -433,6 +417,7 @@ public class MainController {
 		canvas.getGraphicsContext2D().transform(transform);
 		
         drawCanvas();
+        drawPosition(x, y);
 	}
 	
 	private Particle mouseOnParticle(double x, double y) {
