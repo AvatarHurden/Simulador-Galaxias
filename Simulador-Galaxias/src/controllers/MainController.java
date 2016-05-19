@@ -40,6 +40,7 @@ public class MainController {
 	
 	@FXML private ListView<Particle> particleListView;
 	private Particle selectedParticle;
+	private Particle hoveredParticle;
 
 	@FXML private Canvas canvas;
 	@FXML private Label positionLabel;
@@ -211,6 +212,8 @@ public class MainController {
 			drawGrid();
 		
 		for (Particle p : simulation.getParticles()) {
+			if (hoveredParticle != null)
+				drawAura(hoveredParticle);
 			gc.setFill(p.getColor());
 			gc.setStroke(p.getColor());
 			double radius = 1 + p.getMass() / 100;
@@ -316,9 +319,21 @@ public class MainController {
 	    
 	}
 	
+	private void drawAura (Particle p) {
+		GraphicsContext gc = canvas.getGraphicsContext2D();
+		
+		gc.setFill(p.getColor().deriveColor(0, 1, 1, 0.3));
+		gc.setStroke(p.getColor().deriveColor(0, 1, 1, 0.3));
+		double radius = 1 + p.getMass() / 100;
+		double s = (radius / 10);
+		gc.fillOval(-s + (p.getPositionX() - radius / 2), -s + (p.getPositionY() - radius / 2), radius + 2*s, radius + 2*s);
+	}
+	
 	@FXML
 	private void mouseMovedCanvas(MouseEvent evt) {
 		drawPosition(evt.getX(), evt.getY());
+		hoveredParticle = mouseOnParticle(evt.getX(), evt.getY());
+		drawCanvas();
 	}
 	
 	@FXML
@@ -337,6 +352,7 @@ public class MainController {
 		
 		double x = evt.getX();
 		double y = evt.getY();
+		
 		Affine t = canvas.getGraphicsContext2D().getTransform();
 		
 		Particle p = mouseOnParticle(x,y);
@@ -346,6 +362,7 @@ public class MainController {
 		selectedParticle = simulation.createNewParticle((x - t.getTx())/zoom, (y - t.getTy())/zoom);
 
 		particleListView.getSelectionModel().select(selectedParticle);
+		hoveredParticle = mouseOnParticle(evt.getX(), evt.getY());
 		drawCanvas();
 		drawPosition(x, y);
 	}
@@ -375,6 +392,9 @@ public class MainController {
 		
 		double x = evt.getX();
 		double y = evt.getY();
+		
+		hoveredParticle = mouseOnParticle(x, y);
+		
 		Affine a = canvas.getGraphicsContext2D().getTransform();
 		
 		if (evt.getButton() == MouseButton.PRIMARY && isDragging) {
@@ -400,6 +420,8 @@ public class MainController {
 		
 		double x = evt.getX();
 		double y = evt.getY();
+		hoveredParticle = mouseOnParticle(x, y);
+		
 		Affine t = canvas.getGraphicsContext2D().getTransform();
 		
 		double oldX = (x - t.getTx())/zoom;
