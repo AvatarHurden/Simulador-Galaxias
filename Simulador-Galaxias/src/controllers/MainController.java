@@ -59,6 +59,7 @@ public class MainController {
 		
 		particleListView.setItems(simulation.getParticles());
 		particleListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+			hoveredParticle = newValue;
 			selectedParticle = newValue;
 			updateEditingPane();
 			particleListView.scrollTo(selectedParticle);
@@ -278,6 +279,11 @@ public class MainController {
 	}
 	
 	private void drawVelocityVector(GraphicsContext gc, Particle p) {
+	    if (p.getVelocityX() == 0 && p.getVelocityY() == 0) {
+		    gc.setLineWidth(1);
+			return;
+	    }
+	    
 		double radius = 1 + p.getMass() / 100;
 		
 		double arctan = Math.atan2( p.getVelocityY(), p.getVelocityX() );
@@ -289,10 +295,6 @@ public class MainController {
 	    gc.setLineCap(StrokeLineCap.ROUND);
 	    gc.strokeLine(x1, y1, x2, y2);
 	    
-	    if (p.getVelocityX() == 0 && p.getVelocityY() == 0) {
-		    gc.setLineWidth(1);
-			return;
-	    }
 	    
 		double x[] = {0,0,0};
 		double y[] = {0,0,0};
@@ -362,7 +364,6 @@ public class MainController {
 		selectedParticle = simulation.createNewParticle((x - t.getTx())/zoom, (y - t.getTy())/zoom);
 
 		particleListView.getSelectionModel().select(selectedParticle);
-		hoveredParticle = mouseOnParticle(evt.getX(), evt.getY());
 		drawCanvas();
 		drawPosition(x, y);
 	}
@@ -393,8 +394,6 @@ public class MainController {
 		double x = evt.getX();
 		double y = evt.getY();
 		
-		hoveredParticle = mouseOnParticle(x, y);
-		
 		Affine a = canvas.getGraphicsContext2D().getTransform();
 		
 		if (evt.getButton() == MouseButton.PRIMARY && isDragging) {
@@ -420,7 +419,6 @@ public class MainController {
 		
 		double x = evt.getX();
 		double y = evt.getY();
-		hoveredParticle = mouseOnParticle(x, y);
 		
 		Affine t = canvas.getGraphicsContext2D().getTransform();
 		
