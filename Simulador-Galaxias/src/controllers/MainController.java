@@ -45,7 +45,8 @@ public class MainController {
 	@FXML private Slider zoomSlider;
 	
 	private double zoom = 1;
-	private double dragLastX, dragLastY, dragAmountX, dragAmountY;
+	private double dragLastX, dragLastY;
+	private boolean isDragging = false;
 	
 	private boolean showGrid = true, showVectors = true, showGravity;
 	
@@ -58,6 +59,7 @@ public class MainController {
 		particleListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 			selectedParticle = newValue;
 			updateEditingPane();
+			particleListView.scrollTo(selectedParticle);
 		});
 		
 		editPanel.setVisible(false);
@@ -71,29 +73,29 @@ public class MainController {
 		posXField.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (selectedParticle != null)
 				selectedParticle.setPositionX(Double.parseDouble(newValue));
-			drawParticles();
+			drawCanvas();
 		});
 		posYField.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (selectedParticle != null)
 				selectedParticle.setPositionY(Double.parseDouble(newValue));
-			drawParticles();
+			drawCanvas();
 		});
 		
 		velXField.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (selectedParticle != null)
 				selectedParticle.setVelocityX(Double.parseDouble(newValue));
-			drawParticles();
+			drawCanvas();
 		});
 		velYField.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (selectedParticle != null)
 				selectedParticle.setVelocityY(Double.parseDouble(newValue));
-			drawParticles();
+			drawCanvas();
 		});
 		
 		massField.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (selectedParticle != null)
 				selectedParticle.setMass(Double.parseDouble(newValue));
-			drawParticles();
+			drawCanvas();
 		});
 		
 		nameField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -101,13 +103,13 @@ public class MainController {
 				selectedParticle.setName(newValue);
 				particleListView.refresh();
 			}
-			drawParticles();
+			drawCanvas();
 		});
 		
 		colorSelector.valueProperty().addListener((observable, oldValue, newValue) -> {
 			if (selectedParticle != null)
 				selectedParticle.setColor(newValue);
-			drawParticles();
+			drawCanvas();
 		});
 		
 		canvas.widthProperty().bind(canvasPane.widthProperty());
@@ -118,13 +120,13 @@ public class MainController {
 			Affine t = new Affine();
 			t.setTy((newValue.doubleValue() / 2 - oldValue.doubleValue() / 2) / zoom);
 			canvas.getGraphicsContext2D().transform(t);
-			drawParticles();
+			drawCanvas();
 		});
 		canvas.widthProperty().addListener((observable, oldValue, newValue) -> {
 			Affine t = new Affine();
 			t.setTx((newValue.doubleValue() / 2 - oldValue.doubleValue() / 2) / zoom);
 			canvas.getGraphicsContext2D().transform(t);
-			drawParticles();
+			drawCanvas();
 		});
 		
 		canvas.layoutBoundsProperty().addListener((observable, oldValue, newValue) -> {
@@ -143,7 +145,7 @@ public class MainController {
 			t.setMxx(zoom);
 			t.setMyy(zoom);
 			canvas.getGraphicsContext2D().transform(t);
-			drawParticles();
+			drawCanvas();
 		});
 		
 	}
@@ -191,17 +193,18 @@ public class MainController {
 		massField.setText(""+selectedParticle.getMass());
 	}
 	
-	private void drawParticles() {
+	private void drawCanvas() {
 		
 		GraphicsContext gc = canvas.getGraphicsContext2D();
+		Affine t = gc.getTransform();
 		
 		double width = canvas.getWidth();
 		double height = canvas.getHeight();
 
-		double leftLimit = (-width / 2 - dragAmountX) / zoom;
-		double topLimit = (-height / 2 - dragAmountY) / zoom;
+		double leftLimit = - t.getTx() / zoom;
+		double bottomLimit = - t.getTy() / zoom;
 
-		gc.clearRect(leftLimit, topLimit, width / zoom, height / zoom);
+		gc.clearRect(leftLimit, bottomLimit, width / zoom, height / zoom);
 		
 		if (showGrid)
 			drawGrid();
@@ -220,15 +223,16 @@ public class MainController {
 	
 	private void drawGrid() {
 		GraphicsContext gc = canvas.getGraphicsContext2D();
-
+		Affine t = gc.getTransform();
+		
 		double width = canvas.getWidth();
 		double height = canvas.getHeight();
 		
-		double leftLimit = (-width / 2 - dragAmountX) / zoom;
-		double rightLimit = (width / 2 - dragAmountX) / zoom;
-		double bottomLimit = (-height / 2 - dragAmountY) / zoom;
-		double topLimit = (height / 2 - dragAmountY) / zoom;
-		
+		double leftLimit = - t.getTx() / zoom;
+		double rightLimit = (width - t.getTx()) / zoom;
+		double bottomLimit = - t.getTy() / zoom;
+		double topLimit = (height- t.getTy()) / zoom;
+
 		double actualWidth = width / zoom;
 		double step = 1;
 		if (Math.round(actualWidth / step) > 20)
@@ -241,10 +245,10 @@ public class MainController {
 		gc.setStroke(Paint.valueOf("#303050"));
 		gc.setLineWidth(1 / zoom);
 		int lines = (int) (actualWidth / step);
-		int deslocX = (int) Math.ceil(dragAmountX / zoom / step);
-		int deslocY = (int) Math.ceil(dragAmountY / zoom / step);
+		int deslocX = (int) Math.ceil(t.getTx() / zoom / step);
+		int deslocY = (int) Math.ceil(t.getTy() / zoom / step);
 		
-		for (int i = -lines; i < lines; i++) {
+		for (int i = 0; i < 2*lines; i++) {
 			double amount = (i - deslocX) * step;
 			gc.strokeLine(amount, topLimit, amount, bottomLimit);
 			amount = (i - deslocY) * step;
@@ -259,6 +263,32 @@ public class MainController {
 		gc.strokeLine(scaleXStart - scaleWidth, scaleYStart, scaleXStart - scaleWidth, scaleYStart + scaleHeight);
 		gc.strokeLine(scaleXStart, scaleYStart, scaleXStart, scaleYStart + scaleHeight);
 		gc.strokeLine(scaleXStart - scaleWidth, scaleYStart, scaleXStart, scaleYStart);
+		
+	}
+	
+	private void drawPosition(double x, double y) {
+	
+		Affine t = canvas.getGraphicsContext2D().getTransform();
+		
+		String text = String.format("%.2f %.2f", (x - t.getTx())/zoom, (y - t.getTy())/zoom);
+		
+		GraphicsContext gc = canvas.getGraphicsContext2D();
+		Affine inverted = new Affine(t);
+		inverted.setMyy(-1);
+		inverted.setMxx(1);
+		gc.setTransform(inverted);
+
+		double leftLimit = - t.getTx() / 1;
+		double topLimit = ( - t.getTy()) / 1;
+		
+		double scaleXStart = leftLimit + 30 / 1;
+		double scaleYStart = topLimit + 30 / 1;
+		
+		gc.clearRect(scaleXStart, scaleYStart - 20/1, 100/1, 20/1);
+		gc.setFill(Color.WHITESMOKE);
+		System.out.println(scaleXStart + " " + scaleYStart);
+		gc.fillText(text, scaleXStart, scaleYStart);
+		gc.setTransform(t);
 		
 	}
 	
@@ -306,7 +336,7 @@ public class MainController {
 	
 	@FXML
 	private void mouseMovedCanvas(MouseEvent evt) {
-		
+		drawPosition(evt.getX(), evt.getY());
 	}
 	
 	@FXML
@@ -328,34 +358,24 @@ public class MainController {
 				
 		selectedParticle = simulation.createNewParticle((x - t.getTx())/zoom, (y - t.getTy())/zoom);
 				
-		System.out.println(selectedParticle.getPositionX() + " " + selectedParticle.getPositionY());
-		
 		particleListView.getSelectionModel().select(selectedParticle);
-		drawParticles();
+		drawCanvas();
 		particleListView.scrollTo(selectedParticle);
 	}
 	
 	@FXML
 	private void mousePressedCanvas(MouseEvent evt) {
-		if (evt.getButton() != MouseButton.SECONDARY && evt.getButton() != MouseButton.PRIMARY)
-			return;
 		if (evt.getButton() == MouseButton.PRIMARY) {
 			
 			double x = evt.getX();
 			double y = evt.getY();
 			
 			Particle p = mouseOnParticle(x,y);
-			if (p != null) {
-				selectedParticle = p;
-				updateEditingPane();
-				particleListView.refresh();
-				particleListView.getSelectionModel().select(selectedParticle);
-				particleListView.scrollTo(selectedParticle);
-				return;
-			}
+			isDragging = p != null;
+			if (isDragging)
+				particleListView.getSelectionModel().select(p);
 			
-		}
-		if (evt.getButton() == MouseButton.SECONDARY) {
+		} else if (evt.getButton() == MouseButton.SECONDARY) {
 			dragLastX = evt.getX();
 			dragLastY = evt.getY();
 		}
@@ -370,23 +390,21 @@ public class MainController {
 		double y = evt.getY();
 		Affine a = canvas.getGraphicsContext2D().getTransform();
 		
-		if (evt.getButton() == MouseButton.PRIMARY) {
+		if (evt.getButton() == MouseButton.PRIMARY && isDragging) {
 			selectedParticle.setPositionX((x - a.getTx())/zoom);
 			selectedParticle.setPositionY((y - a.getTy())/zoom);
-			drawParticles();
+			drawCanvas();
 			particleListView.refresh();
 		}
 		
 		if (evt.getButton() == MouseButton.SECONDARY) {
-			dragAmountX += evt.getX() - dragLastX;
-			dragAmountY += evt.getY() - dragLastY;
 			
 			Affine t = new Affine();
 			t.setTx((evt.getX() - dragLastX) / zoom);
 			t.setTy((evt.getY() - dragLastY) / zoom);
-			
 			canvas.getGraphicsContext2D().transform(t);
-			drawParticles();
+			
+			drawCanvas();
 			
 			dragLastX = evt.getX();
 			dragLastY = evt.getY();
@@ -409,20 +427,16 @@ public class MainController {
 		double newX = (x - t.getTx())/zoom;
 		double newY = (y - t.getTy())/zoom;
 		
-		dragAmountX += (-oldX + newX) * zoom;
-		dragAmountY += (-oldY + newY) * zoom;
-
 		Affine transform = new Affine();
 		transform.setTx(-oldX + newX);
 		transform.setTy(-oldY + newY);
 		canvas.getGraphicsContext2D().transform(transform);
 		
-        drawParticles();
+        drawCanvas();
 	}
 	
 	private Particle mouseOnParticle(double x, double y) {
-		if (simulation.getParticles().isEmpty())
-			return null;
+		
 		Affine t = canvas.getGraphicsContext2D().getTransform();
 
 		for (Particle p : simulation.getParticles()) 
@@ -437,7 +451,7 @@ public class MainController {
 		selectedParticle = simulation.createNewParticle(0, 0);
 		
 		particleListView.getSelectionModel().select(selectedParticle);
-		drawParticles();
+		drawCanvas();
 	}
 	
 	@FXML
@@ -446,7 +460,7 @@ public class MainController {
 			return;
 		
 		simulation.getParticles().remove(selectedParticle);
-		drawParticles();
+		drawCanvas();
 	}
 
 	// =========================================
@@ -466,7 +480,7 @@ public class MainController {
 		if (f != null)
 			simulation.loadFile(f);
 
-		drawParticles();
+		drawCanvas();
 	}
 	
 	@FXML
@@ -507,14 +521,14 @@ public class MainController {
 	private void toggleGridVisibility(ActionEvent evt) {
 		CheckMenuItem source = (CheckMenuItem) evt.getSource();
 		showGrid = source.isSelected();
-		drawParticles();
+		drawCanvas();
 	}
 	
 	@FXML
 	private void toggleVectorVisibility(ActionEvent evt) {
 		CheckMenuItem source = (CheckMenuItem) evt.getSource();
 		showVectors = source.isSelected();
-		drawParticles();
+		drawCanvas();
 	}
 	
 }
