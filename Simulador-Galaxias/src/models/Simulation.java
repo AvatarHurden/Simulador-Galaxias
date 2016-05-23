@@ -14,13 +14,10 @@ import com.google.gson.stream.JsonReader;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 
 public class Simulation {
-
-	public enum Scale {
-		PLANET, STAR_SYSTEM, STAR_NEIGHBORHOOD, GALAXY, LOCAL_GROUP, LOCAL_SUPERCLUSTER, SUPERCLUSTERS; 
-	}
 	
 	private File sourceFile;
 	
@@ -30,7 +27,6 @@ public class Simulation {
 	public Simulation() {
 		particles = FXCollections.observableArrayList();
 		
-		scale = Scale.STAR_SYSTEM;
 	}
 
 	public File getSourceFile() {
@@ -59,6 +55,25 @@ public class Simulation {
 		
 		particles.add(p);
 		return p;
+	}
+	
+	public void step() {
+		
+		Quadrant quad = new Quadrant(Point2D.ZERO, 400);
+		BHTree tree = new BHTree(quad);
+		
+		
+		for (Particle p : particles) {
+			if (quad.containsParticle(p))
+				tree.insert(p);
+		}
+		
+		for (Particle p : particles) {
+			p.resetForce();
+			tree.updateForce(p);
+			p.update(1);
+		}
+		
 	}
 	
 	public void loadFile(File f) {

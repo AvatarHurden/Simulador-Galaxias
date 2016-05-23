@@ -23,7 +23,7 @@ public class Quadrant {
 	}
 	
 	public boolean containsParticle(Particle p) {
-		return containsPoint(p.getPosition());
+		return containsPoint(new Point2D(p.getPositionX(), p.getPositionY()));
 	}
 	
 	public Quadrant getNW() {

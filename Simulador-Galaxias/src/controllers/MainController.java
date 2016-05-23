@@ -3,12 +3,14 @@ package controllers;
 import java.io.File;
 
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
@@ -26,6 +28,7 @@ import javafx.scene.transform.Affine;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import models.Particle;
+import models.Scale;
 import models.Simulation;
 
 public class MainController {
@@ -42,6 +45,8 @@ public class MainController {
 	private Particle selectedParticle;
 	private Particle hoveredParticle;
 
+	@FXML private ComboBox<Scale> scaleSelection;
+	
 	@FXML private Canvas canvas;
 	@FXML private Label positionLabel;
 	@FXML private Slider zoomSlider;
@@ -56,6 +61,12 @@ public class MainController {
 	private void initialize() {
 		
 		simulation = new Simulation();
+		
+		scaleSelection.setItems(FXCollections.observableArrayList(Scale.values()));
+		scaleSelection.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+			simulation.setScale(newValue);
+		});
+		scaleSelection.getSelectionModel().select(0);
 		
 		particleListView.setItems(simulation.getParticles());
 		particleListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
@@ -217,7 +228,7 @@ public class MainController {
 				drawAura(hoveredParticle);
 			gc.setFill(p.getColor());
 			gc.setStroke(p.getColor());
-			double radius = 1 + p.getMass() / 100;
+			double radius = 1;
 			gc.fillOval(p.getPositionX() - radius / 2, p.getPositionY() - radius / 2, radius, radius);
 			
 			if (showVectors)
@@ -467,7 +478,41 @@ public class MainController {
 		simulation.getParticles().remove(selectedParticle);
 		drawCanvas();
 	}
+	
+	// =========================================
+	// Simulation
+	// =========================================
 
+	@FXML
+	private void stepSimulation() {
+		simulation.step();
+		
+		updateEditingPane();
+		drawCanvas();
+	}
+	
+	
+	private boolean run = false;
+	@FXML
+	private void runSimulation() {
+		
+		new Thread(() -> {
+			for (int i = 0; i < 1000000; i++) {
+				simulation.step();
+		            
+		        javafx.application.Platform.runLater(() -> {
+		        	updateEditingPane();
+			        drawCanvas();
+		        });	
+		        
+		        try {
+		        	Thread.sleep(20);
+		        } catch (Exception e) {}
+			}
+		}).start();;
+		
+	}
+	
 	// =========================================
 	// Menu Items
 	// =========================================

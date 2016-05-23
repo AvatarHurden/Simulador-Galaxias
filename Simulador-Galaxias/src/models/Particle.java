@@ -1,6 +1,5 @@
 package models;
 
-import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 
 public class Particle {
@@ -14,15 +13,20 @@ public class Particle {
 	private String colorValue;
 	
 	private double mass;
-	private Point2D position, velocity, force;
+	private double posX, posY, velX, velY, forceX, forceY;
 
 	public Particle(String name) {
 		
 		this.name = name;
+	
+		mass = 1;
 		
-		position = new Point2D(0, 0);
-		velocity = new Point2D(0, 0);
-		force = new Point2D(0, 0);
+		posX = 0;
+		posY = 0;
+		velX = 0;
+		velY = 0;
+		
+		resetForce();
 	}
 	
 	public String getName() {
@@ -51,41 +55,37 @@ public class Particle {
 	public void setMass(double mass) {
 		this.mass = mass;
 	}
-	
-	public Point2D getPosition() {
-		return position;
-	}
 
 	public double getPositionY() {
-		return position.getY();
+		return posY;
 	}
 
 	public void setPositionY(double Y) {
-		position = new Point2D(position.getX(), Y);
+		posY = Y;
 	}
 
 	public double getPositionX() {
-		return position.getX();
+		return posX;
 	}
 
 	public void setPositionX(double X) {
-		position = new Point2D(X, position.getY());
+		posX = X;
 	}
 
 	public double getVelocityY() {
-		return velocity.getY();
+		return velY;
 	}
 
 	public void setVelocityY(double Y) {
-		velocity = new Point2D(velocity.getX(), Y);
+		velY = Y;
 	}
 
 	public double getVelocityX() {
-		return velocity.getX();
+		return velX;
 	}
 
 	public void setVelocityX(double X) {
-		velocity = new Point2D(X, velocity.getY());
+		velX = X;
 	}
 	
 	public double distanceTo(Particle p) {
@@ -101,6 +101,19 @@ public class Particle {
 		
 		return distance <= radius;
 	}
+
+	public void update(double dt) {
+		velY += forceY * dt / mass;
+		velX += forceX * dt / mass;
+		
+		posY += velY * dt;
+		posX += velX * dt;
+	}
+	
+	public void resetForce() {
+		forceX = 0;
+		forceY = 0;
+	}
 	
 	public void addForce(Particle p) {
         double EPS = 3E4;
@@ -110,8 +123,9 @@ public class Particle {
         double dist = Math.sqrt(dx*dx + dy*dy);
         
         double F = (G * mass * p.mass) / (dist*dist + EPS*EPS);
-        
-        force = force.add(F * dx / dist, F * dy / dist);
+     
+        forceX += F * dx / dist;
+        forceY += F * dy / dist;
 	}
 	
 	
