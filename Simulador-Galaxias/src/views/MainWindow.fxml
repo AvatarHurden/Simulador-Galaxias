@@ -125,7 +125,7 @@
          <children>
             <ComboBox fx:id="scaleSelection" prefWidth="150.0" />
           <Button mnemonicParsing="false" onAction="#stepSimulation" text="Step" />
-            <Button mnemonicParsing="false" onAction="#runSimulation" text="Run" />
+            <Button fx:id="runButton" mnemonicParsing="false" onAction="#runSimulation" text="Run" />
          </children>
          <padding>
             <Insets left="10.0" right="10.0" />

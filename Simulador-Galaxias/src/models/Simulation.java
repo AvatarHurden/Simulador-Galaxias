@@ -24,9 +24,10 @@ public class Simulation {
 	private Scale scale;
 	private ObservableList<Particle> particles;
 	
+	private double time;
+	
 	public Simulation() {
 		particles = FXCollections.observableArrayList();
-		
 	}
 
 	public File getSourceFile() {
@@ -47,14 +48,55 @@ public class Simulation {
 	
 	public Particle createNewParticle(double x, double y) {
 		Particle p = new Particle("Particle " + (particles.size() + 1));
-		p.setPositionX(x);
-		p.setPositionY(y);
+		setPositionXInUnit(p, x);
+		setPositionYInUnit(p, y);
+		setMassInUnit(p, 1);
 
 		Random rand = new Random();
 		p.setColor(Color.rgb(rand.nextInt(255), rand.nextInt(255), rand.nextInt(255)));
 		
 		particles.add(p);
 		return p;
+	}
+	
+	public void setMassInUnit(Particle p, double mass) {
+		p.setMass(mass * scale.getMassConversion());	
+	}
+	 
+	public double getMassInUnit(Particle p) {
+		return p.getMass() / scale.getMassConversion();
+	}
+	
+	public void setPositionXInUnit(Particle p, double posX) {
+		p.setPositionX(posX * scale.getDistanceConversion());
+	}
+	
+	public double getPositionXInUnit(Particle p) {
+		return p.getPositionX() / scale.getDistanceConversion();
+	}
+	
+	public void setPositionYInUnit(Particle p, double posY) {
+		p.setPositionY(posY * scale.getDistanceConversion());
+	}
+	
+	public double getPositionYInUnit(Particle p) {
+		return p.getPositionY() / scale.getDistanceConversion();
+	}
+	
+	public void setVelocityXInUnit(Particle p, double velX) {
+		p.setVelocityX(velX * scale.getDistanceConversion());
+	}
+
+	public double getVelocityXInUnit(Particle p) {
+		return p.getVelocityX() / scale.getDistanceConversion();
+	}
+	
+	public void setVelocityYInUnit(Particle p, double velY) {
+		p.setVelocityY(velY * scale.getDistanceConversion());
+	}
+	
+	public double getVelocityYInUnit(Particle p) {
+		return p.getVelocityY() / scale.getDistanceConversion();
 	}
 	
 	public void step() {

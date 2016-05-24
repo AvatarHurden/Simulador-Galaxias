@@ -11,9 +11,10 @@ public enum Scale {
 //	SUPERCLUSTERS; 
 
 	private String name;
-	// Mass converts to kg, distance converts to km;
+	// Mass converts to kg, distance converts to km
 	private double massConversion, distanceConversion;
-	private double timeUnit, timeStep;
+	// Time converts to milliseconds, with the step being multiplied by the conversion (
+	private double timeConversion, timeStep;
 	
 
 	private Scale(String name, double massConversion , double distanceConversion) {
@@ -35,7 +36,7 @@ public enum Scale {
 	}
 
 	public double getTimeUnit() {
-		return timeUnit;
+		return timeConversion;
 	}
 
 	public double getTimeStep() {

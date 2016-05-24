@@ -19,8 +19,6 @@ public class Particle {
 		
 		this.name = name;
 	
-		mass = 1;
-		
 		posX = 0;
 		posY = 0;
 		velX = 0;

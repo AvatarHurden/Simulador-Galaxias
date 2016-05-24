@@ -2,12 +2,14 @@ package controllers;
 
 import java.io.File;
 
+import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
@@ -46,6 +48,8 @@ public class MainController {
 	private Particle hoveredParticle;
 
 	@FXML private ComboBox<Scale> scaleSelection;
+	@FXML private Button runButton;
+	
 	
 	@FXML private Canvas canvas;
 	@FXML private Label positionLabel;
@@ -55,7 +59,7 @@ public class MainController {
 	private double dragLastX, dragLastY;
 	private boolean isDragging = false;
 	
-	private boolean showGrid = true, showVectors = true, showGravity;
+	private boolean showGrid = true, showVectors = true;
 	
 	@FXML
 	private void initialize() {
@@ -86,29 +90,29 @@ public class MainController {
 		
 		posXField.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (selectedParticle != null)
-				selectedParticle.setPositionX(Double.parseDouble(newValue));
+				simulation.setPositionXInUnit(selectedParticle, Double.parseDouble(newValue));
 			drawCanvas();
 		});
 		posYField.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (selectedParticle != null)
-				selectedParticle.setPositionY(Double.parseDouble(newValue));
+				simulation.setPositionYInUnit(selectedParticle, Double.parseDouble(newValue));
 			drawCanvas();
 		});
 		
 		velXField.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (selectedParticle != null)
-				selectedParticle.setVelocityX(Double.parseDouble(newValue));
+				simulation.setVelocityXInUnit(selectedParticle, Double.parseDouble(newValue));
 			drawCanvas();
 		});
 		velYField.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (selectedParticle != null)
-				selectedParticle.setVelocityY(Double.parseDouble(newValue));
+			simulation.setVelocityYInUnit(selectedParticle, Double.parseDouble(newValue));
 			drawCanvas();
 		});
 		
 		massField.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (selectedParticle != null)
-				selectedParticle.setMass(Double.parseDouble(newValue));
+				simulation.setMassInUnit(selectedParticle, Double.parseDouble(newValue));
 			drawCanvas();
 		});
 		
@@ -199,12 +203,12 @@ public class MainController {
 		nameField.setText(selectedParticle.getName());
 		colorSelector.setValue(selectedParticle.getColor());
 		
-		posXField.setText(""+selectedParticle.getPositionX());
-		posYField.setText(""+selectedParticle.getPositionY());
-		velXField.setText(""+selectedParticle.getVelocityX());
-		velYField.setText(""+selectedParticle.getVelocityY());
+		posXField.setText(""+simulation.getPositionXInUnit(selectedParticle));
+		posYField.setText(""+simulation.getPositionYInUnit(selectedParticle));
+		velXField.setText(""+simulation.getVelocityXInUnit(selectedParticle));
+		velYField.setText(""+simulation.getVelocityYInUnit(selectedParticle));
 		
-		massField.setText(""+selectedParticle.getMass());
+		massField.setText(""+simulation.getMassInUnit(selectedParticle));
 	}
 	
 	private void drawCanvas() {
@@ -229,7 +233,8 @@ public class MainController {
 			gc.setFill(p.getColor());
 			gc.setStroke(p.getColor());
 			double radius = 1;
-			gc.fillOval(p.getPositionX() - radius / 2, p.getPositionY() - radius / 2, radius, radius);
+			gc.fillOval(simulation.getPositionXInUnit(p) - radius / 2, 
+					simulation.getPositionYInUnit(p) - radius / 2, radius, radius);
 			
 			if (showVectors)
 				drawVelocityVector(gc, p);
@@ -295,12 +300,14 @@ public class MainController {
 			return;
 	    }
 	    
-		double radius = 1 + p.getMass() / 100;
+		double radius = 1 + simulation.getMassInUnit(p) / 100;
 		
 		double arctan = Math.atan2( p.getVelocityY(), p.getVelocityX() );
 		
-		double x1 = p.getPositionX() + (radius/2) *  Math.cos(arctan), x2 = x1 + p.getVelocityX();
-		double y1 = p.getPositionY() + (radius/2) *  Math.sin(arctan), y2 = y1 + p.getVelocityY();
+		double x1 = simulation.getPositionXInUnit(p) + (radius/2) *  Math.cos(arctan);
+		double x2 = x1 + simulation.getVelocityXInUnit(p);
+		double y1 = simulation.getPositionYInUnit(p) + (radius/2) *  Math.sin(arctan);
+		double y2 = y1 + simulation.getVelocityYInUnit(p);
 		
 	    gc.setLineWidth(0.05 * radius);
 	    gc.setLineCap(StrokeLineCap.ROUND);
@@ -337,9 +344,11 @@ public class MainController {
 		
 		gc.setFill(p.getColor().deriveColor(0, 1, 1, 0.3));
 		gc.setStroke(p.getColor().deriveColor(0, 1, 1, 0.3));
-		double radius = 1 + p.getMass() / 100;
+		double radius = 1 + simulation.getMassInUnit(p) / 100;
 		double s = (radius / 10);
-		gc.fillOval(-s + (p.getPositionX() - radius / 2), -s + (p.getPositionY() - radius / 2), radius + 2*s, radius + 2*s);
+		gc.fillOval(-s + (simulation.getPositionXInUnit(p) - radius / 2), 
+				-s + (simulation.getPositionYInUnit(p) - radius / 2), 
+				radius + 2*s, radius + 2*s);
 	}
 	
 	@FXML
@@ -495,21 +504,25 @@ public class MainController {
 	private boolean run = false;
 	@FXML
 	private void runSimulation() {
+		run = !run;
 		
-		new Thread(() -> {
-			for (int i = 0; i < 1000000; i++) {
-				simulation.step();
-		            
-		        javafx.application.Platform.runLater(() -> {
-		        	updateEditingPane();
-			        drawCanvas();
-		        });	
-		        
-		        try {
-		        	Thread.sleep(20);
-		        } catch (Exception e) {}
-			}
-		}).start();;
+		runButton.setText(run ? "Pause" : "Run");
+		
+		if (run)
+			new Thread(() -> {
+				while (run) {
+					simulation.step();
+			            
+			        Platform.runLater(() -> {
+			        	updateEditingPane();
+				        drawCanvas();
+			        });	
+			        
+			        try {
+			        	Thread.sleep(20);
+			        } catch (Exception e) {}
+				}
+			}).start();
 		
 	}
 	
