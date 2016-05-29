@@ -41,6 +41,10 @@ public class Simulation {
 	public void setScale(Scale scale) {
 		this.scale = scale;
 	}
+	
+	public double getTime() {
+		return time;
+	}
 
 	public ObservableList<Particle> getParticles() {
 		return particles;
@@ -100,6 +104,7 @@ public class Simulation {
 	}
 	
 	public void step() {
+		time += scale.getTimeStep();
 		
 		Quadrant quad = new Quadrant(Point2D.ZERO, 400);
 		BHTree tree = new BHTree(quad);
@@ -113,7 +118,7 @@ public class Simulation {
 		for (Particle p : particles) {
 			p.resetForce();
 			tree.updateForce(p);
-			p.update(1);
+			p.update(scale.getTimeStep());
 		}
 		
 	}

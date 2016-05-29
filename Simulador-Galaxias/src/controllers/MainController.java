@@ -52,7 +52,7 @@ public class MainController {
 	
 	
 	@FXML private Canvas canvas;
-	@FXML private Label positionLabel;
+	@FXML private Label positionLabel, distanceLabel, timeLabel;
 	@FXML private Slider zoomSlider;
 	
 	private double zoom = 1;
@@ -284,7 +284,8 @@ public class MainController {
 		gc.strokeLine(scaleXStart - scaleWidth, scaleYStart, scaleXStart - scaleWidth, scaleYStart + scaleHeight);
 		gc.strokeLine(scaleXStart, scaleYStart, scaleXStart, scaleYStart + scaleHeight);
 		gc.strokeLine(scaleXStart - scaleWidth, scaleYStart, scaleXStart, scaleYStart);
-		
+
+		distanceLabel.setText(""+simulation.getScale().getDistanceConversion() * step);
 	}
 	
 	private void drawPosition(double x, double y) {
@@ -516,6 +517,7 @@ public class MainController {
 			        Platform.runLater(() -> {
 			        	updateEditingPane();
 				        drawCanvas();
+				        timeLabel.setText(""+simulation.getTime());
 			        });	
 			        
 			        try {
