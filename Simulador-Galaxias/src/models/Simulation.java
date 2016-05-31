@@ -71,6 +71,10 @@ public class Simulation {
 		return p.getMass() / scale.getMassConversion();
 	}
 	
+	public double getRadiusInUnit(Particle p) {
+		return p.getRadius() / scale.getDistanceConversion();
+	}
+	
 	public void setPositionXInUnit(Particle p, double posX) {
 		p.setPositionX(posX * scale.getDistanceConversion());
 	}
@@ -103,10 +107,17 @@ public class Simulation {
 		return p.getVelocityY() / scale.getDistanceConversion();
 	}
 	
+	public Particle getParticleOnPoint(double x, double y) {
+		for (Particle p : particles)
+			if (p.hasPoint(x * scale.getDistanceConversion(), y * scale.getDistanceConversion()))
+				return p;
+		return null;
+	}
+	
 	public void step() {
 		time += scale.getTimeStep();
 		
-		Quadrant quad = new Quadrant(Point2D.ZERO, 400);
+		Quadrant quad = new Quadrant(Point2D.ZERO, 400 * scale.getDistanceConversion());
 		BHTree tree = new BHTree(quad);
 		
 		

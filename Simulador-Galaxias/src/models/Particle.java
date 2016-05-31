@@ -53,6 +53,10 @@ public class Particle {
 	public void setMass(double mass) {
 		this.mass = mass;
 	}
+	
+	public double getRadius() {
+		return Math.pow((mass / 1500)/(4.0*Math.PI/3.0), 1.0/3.0);
+	}
 
 	public double getPositionY() {
 		return posY;
@@ -93,11 +97,9 @@ public class Particle {
 	}
 	
 	public boolean hasPoint(double x, double y) {
-		double radius = (1 + getMass() / 100)/2;
-		
 		double distance = Math.sqrt((getPositionX() - x) * (getPositionX() - x) + (getPositionY() - y) * (getPositionY() - y));
 		
-		return distance <= radius;
+		return distance <= getRadius();
 	}
 
 	public void update(double dt) {

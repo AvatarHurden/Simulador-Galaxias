@@ -156,7 +156,7 @@ public class MainController {
 		
 		zoomSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
 			double zoom = 1;
-			zoom *= Math.pow(1.1, (newValue.doubleValue() - oldValue.doubleValue()));
+			zoom *= Math.pow(1.25, (newValue.doubleValue() - oldValue.doubleValue()));
 				
 			this.zoom *= zoom;
 			Affine t = new Affine();
@@ -232,9 +232,9 @@ public class MainController {
 				drawAura(hoveredParticle);
 			gc.setFill(p.getColor());
 			gc.setStroke(p.getColor());
-			double radius = 1;
-			gc.fillOval(simulation.getPositionXInUnit(p) - radius / 2, 
-					simulation.getPositionYInUnit(p) - radius / 2, radius, radius);
+			double diameter = simulation.getRadiusInUnit(p) * 2;
+			gc.fillOval(simulation.getPositionXInUnit(p) - diameter / 2, 
+					simulation.getPositionYInUnit(p) - diameter / 2, diameter, diameter);
 			
 			if (showVectors)
 				drawVelocityVector(gc, p);
@@ -345,11 +345,11 @@ public class MainController {
 		
 		gc.setFill(p.getColor().deriveColor(0, 1, 1, 0.3));
 		gc.setStroke(p.getColor().deriveColor(0, 1, 1, 0.3));
-		double radius = 1 + simulation.getMassInUnit(p) / 100;
-		double s = (radius / 10);
-		gc.fillOval(-s + (simulation.getPositionXInUnit(p) - radius / 2), 
-				-s + (simulation.getPositionYInUnit(p) - radius / 2), 
-				radius + 2*s, radius + 2*s);
+		double diameter = simulation.getRadiusInUnit(p) * 2;
+		double s = diameter / 10;
+		gc.fillOval(-s + (simulation.getPositionXInUnit(p) - diameter / 2), 
+				-s + (simulation.getPositionYInUnit(p) - diameter / 2), 
+				diameter + 2*s, diameter + 2*s);
 	}
 	
 	@FXML
@@ -465,11 +465,7 @@ public class MainController {
 		
 		Affine t = canvas.getGraphicsContext2D().getTransform();
 
-		for (Particle p : simulation.getParticles()) 
-			if (p.hasPoint((x - t.getTx())/zoom, (y - t.getTy())/zoom)) 
-				return p;
-		
-		return null;
+		return simulation.getParticleOnPoint((x - t.getTx())/zoom, (y - t.getTy())/zoom);
 	}
 	
 	@FXML

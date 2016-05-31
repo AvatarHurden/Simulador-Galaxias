@@ -2,7 +2,7 @@ package models;
 
 public enum Scale {
 	
-	PLANET("Planet", 5.972e24, 1.496e7, 60),
+	PLANET("Planet", 5.972e24, 1.496e9, 3600*24),
 	STAR_SYSTEM("Star System", 5.972e24, 1.496e7, 3600*3);
 //	STAR_NEIGHBORHOOD, 
 //	GALAXY, 
@@ -11,7 +11,7 @@ public enum Scale {
 //	SUPERCLUSTERS; 
 
 	private String name;
-	// Mass converts to kg, distance converts to km
+	// Mass converts to kg, distance converts to m
 	private double massConversion, distanceConversion;
 	// Simulation step, in seconds
 	private double timeStep;
