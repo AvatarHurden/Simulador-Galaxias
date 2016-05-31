@@ -495,6 +495,16 @@ public class MainController {
 		
 		updateEditingPane();
 		drawCanvas();
+        timeLabel.setText(""+simulation.getTime());
+	}
+	
+	@FXML
+	private void resetSimulation() {
+		simulation.reset();
+		
+		updateEditingPane();
+		drawCanvas();
+        timeLabel.setText(""+simulation.getTime());
 	}
 	
 	
@@ -542,6 +552,7 @@ public class MainController {
 			simulation.loadFile(f);
 
 		drawCanvas();
+		scaleSelection.getSelectionModel().select(simulation.getScale());
 	}
 	
 	@FXML

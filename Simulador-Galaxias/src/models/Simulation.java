@@ -4,11 +4,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 
@@ -23,10 +27,12 @@ public class Simulation {
 	
 	private Scale scale;
 	private ObservableList<Particle> particles;
+	private List<Particle> originalParticles;
 	
 	private double time;
 	
 	public Simulation() {
+		originalParticles = new ArrayList<Particle>();
 		particles = FXCollections.observableArrayList();
 	}
 
@@ -114,12 +120,19 @@ public class Simulation {
 		return null;
 	}
 	
+	private void populateOriginal() {
+		originalParticles.clear();
+		for (Particle p : particles)
+			originalParticles.add(p.getCopy());
+	}
+	
 	public void step() {
+		if (time == 0)
+			populateOriginal();
 		time += scale.getTimeStep();
 		
 		Quadrant quad = new Quadrant(Point2D.ZERO, 400 * scale.getDistanceConversion());
 		BHTree tree = new BHTree(quad);
-		
 		
 		for (Particle p : particles) {
 			if (quad.containsParticle(p))
@@ -134,12 +147,27 @@ public class Simulation {
 		
 	}
 	
+	public void reset() {
+		time = 0;
+		particles.clear();
+		for (Particle p : originalParticles)
+			particles.add(p.plus(new Particle("")));
+	}
+	
 	public void loadFile(File f) {
 		try (FileReader freader = new FileReader(f)) {
-			JsonReader reader = new JsonReader(freader);
-			List<Particle> list = new Gson().fromJson(reader, new TypeToken<List<Particle>>(){}.getType());
+			JsonParser parser = new JsonParser();
+			
+			JsonElement element = parser.parse(freader);
+			
+			JsonObject obj = element.getAsJsonObject();
+			scale = Scale.valueOf(obj.get("scale").getAsString());
+			
+			List<Particle> list = new Gson().fromJson(obj.getAsJsonArray("particles"), 
+					new TypeToken<List<Particle>>(){}.getType());
 			
 			particles.setAll(list);
+			time = 0;
 			sourceFile = f;
 		} catch (Exception e){
 			e.printStackTrace();	
@@ -151,7 +179,15 @@ public class Simulation {
 		
 		try (FileWriter writer = new FileWriter(f)) {
 		    Gson gson = new GsonBuilder().create();
-		    gson.toJson(particles, writer);
+		    
+		    if (originalParticles.isEmpty())
+		    	originalParticles.addAll(particles);
+		    
+		    JsonObject json = new JsonObject();
+		    json.add("scale", gson.toJsonTree(scale));
+		    json.add("particles", gson.toJsonTree(originalParticles));
+		    
+		    gson.toJson(json, writer);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

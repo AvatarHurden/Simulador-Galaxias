@@ -125,6 +125,7 @@
       <HBox alignment="CENTER_LEFT" layoutX="200.0" layoutY="25.0" prefHeight="35.0" prefWidth="400.0" spacing="10.0" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
          <children>
             <ComboBox fx:id="scaleSelection" prefWidth="150.0" />
+            <Button mnemonicParsing="false" onAction="#resetSimulation" text="Reset" />
           <Button mnemonicParsing="false" onAction="#stepSimulation" text="Step" />
             <Button fx:id="runButton" mnemonicParsing="false" onAction="#runSimulation" text="Run" />
             <Label fx:id="timeLabel" text="Label" />

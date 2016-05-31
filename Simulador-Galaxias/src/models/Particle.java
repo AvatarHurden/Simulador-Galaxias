@@ -148,4 +148,19 @@ public class Particle {
 	    
 	    return ret;
 	}
+	
+	public Particle getCopy() {
+		Particle ret = new Particle(name);
+		ret.setColor(color);
+		
+		ret.setMass(mass);
+		 
+		ret.setPositionX(posX);
+	    ret.setPositionY(posY);
+
+	    ret.setVelocityX(velX); 
+	    ret.setVelocityY(velY); 
+	    
+	    return ret;
+	}
 }
