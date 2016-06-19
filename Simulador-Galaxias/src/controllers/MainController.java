@@ -302,13 +302,14 @@ public class MainController {
 	    }
 	    
 		double radius = 1 + simulation.getMassInUnit(p) / 100;
+		//System.out.println(p.getVelocityY()*10e8);
 		
-		double arctan = Math.atan2( p.getVelocityY(), p.getVelocityX() );
+		double arctan = Math.atan2( p.getVelocityY()*10e7, p.getVelocityX()*10e7 );
 		
 		double x1 = simulation.getPositionXInUnit(p) + (radius/2) *  Math.cos(arctan);
-		double x2 = x1 + simulation.getVelocityXInUnit(p);
+		double x2 = x1 + simulation.getVelocityXInUnit(p)*10e6;
 		double y1 = simulation.getPositionYInUnit(p) + (radius/2) *  Math.sin(arctan);
-		double y2 = y1 + simulation.getVelocityYInUnit(p);
+		double y2 = y1 + simulation.getVelocityYInUnit(p)*10e6;
 		
 	    gc.setLineWidth(0.05 * radius);
 	    gc.setLineCap(StrokeLineCap.ROUND);
@@ -524,7 +525,7 @@ public class MainController {
 			        	updateEditingPane();
 				        drawCanvas();
 				        timeLabel.setText(""+simulation.getTime());
-			        });	
+			        });
 			        
 			        try {
 			        	Thread.sleep(20);

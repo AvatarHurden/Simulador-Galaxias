@@ -126,12 +126,24 @@ public class Simulation {
 			originalParticles.add(p.getCopy());
 	}
 	
+	private double calculateArea() {
+		double radius = 0;
+		double distance = 0;
+		for (Particle p : particles) {
+			distance = Math.max(Math.abs(getPositionXInUnit(p)), Math.abs(getPositionYInUnit(p)));
+			if (distance > radius) 
+				radius = distance;
+		}
+		
+		return radius;
+	}
+	
 	public void step() {
 		if (time == 0)
 			populateOriginal();
 		time += scale.getTimeStep();
 		
-		Quadrant quad = new Quadrant(Point2D.ZERO, 400 * scale.getDistanceConversion());
+		Quadrant quad = new Quadrant(Point2D.ZERO, calculateArea());
 		BHTree tree = new BHTree(quad);
 		
 		for (Particle p : particles) {
