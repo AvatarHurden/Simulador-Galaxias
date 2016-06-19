@@ -305,12 +305,12 @@ public class MainController {
 	    
 		double radius = 1 + simulation.getRadiusInUnit(p);
 		
-		double arctan = Math.atan2( p.getVelocityY()*10e7, p.getVelocityX()*10e7 );
+		double arctan = Math.atan2( p.getVelocityY(), p.getVelocityX() );
 		
 		double x1 = simulation.getPositionXInUnit(p) + (radius/2) *  Math.cos(arctan);
-		double x2 = x1 + simulation.getVelocityXInUnit(p)*1e5;
+		double x2 = x1 + simulation.getVelocityXInUnit(p)*1e6;
 		double y1 = simulation.getPositionYInUnit(p) + (radius/2) *  Math.sin(arctan);
-		double y2 = y1 + simulation.getVelocityYInUnit(p)*1e5;
+		double y2 = y1 + simulation.getVelocityYInUnit(p)*1e6;
 		
 	    gc.setLineWidth(0.05 * radius);
 	    gc.setLineCap(StrokeLineCap.ROUND);
@@ -577,8 +577,32 @@ public class MainController {
 	}
 	
 	@FXML
-	private void newFile() {
+	private void saveAs() {
 		
+		File f = simulation.getSourceFile();
+		
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle("Save Simulation File");
+			fileChooser.setInitialDirectory(new File(System.getProperty("user.dir"))); 
+			fileChooser.getExtensionFilters().add(new ExtensionFilter("Simulations", "*.nbody"));
+			
+			f = fileChooser.showSaveDialog(canvas.getScene().getWindow());
+		
+		if (f != null)
+			simulation.saveFile(f);
+		
+	}
+	
+	@FXML
+	private void newFile() {
+		simulation = new Simulation();
+		
+		scaleSelection.getSelectionModel().select(0);
+		
+		particleListView.setItems(simulation.getParticles());
+		
+		drawCanvas();
+		updateEditingPane();
 	}
 	
 	@FXML

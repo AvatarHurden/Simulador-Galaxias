@@ -14,7 +14,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -34,6 +33,7 @@ public class Simulation {
 	public Simulation() {
 		originalParticles = new ArrayList<Particle>();
 		particles = FXCollections.observableArrayList();
+		scale = Scale.BASIC;
 	}
 
 	public File getSourceFile() {
@@ -114,10 +114,12 @@ public class Simulation {
 	}
 	
 	public Particle getParticleOnPoint(double x, double y) {
+		Particle pa = null;
 		for (Particle p : particles)
 			if (p.hasPoint(x * scale.getDistanceConversion(), y * scale.getDistanceConversion()))
-				return p;
-		return null;
+				pa = p;
+		
+		return pa;
 	}
 	
 	private void populateOriginal() {
