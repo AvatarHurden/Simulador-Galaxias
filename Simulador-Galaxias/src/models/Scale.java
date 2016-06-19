@@ -2,7 +2,7 @@ package models;
 
 public enum Scale {
 	
-	BASIC("Basoc", 1e4, 0.4, 5e5),
+	BASIC("Basic", 1e4, 0.4, 5e5),
 	PLANET("Planet", 5.972e24, 1.496e9, 3600*24),
 	STAR_SYSTEM("Star System", 5.972e24, 1.496e7, 3600*3);
 //	STAR_NEIGHBORHOOD, 

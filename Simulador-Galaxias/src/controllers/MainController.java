@@ -233,6 +233,8 @@ public class MainController {
 			gc.setFill(p.getColor());
 			gc.setStroke(p.getColor());
 			double diameter = simulation.getRadiusInUnit(p) * 2;
+			if (diameter * zoom < 1)
+				diameter = 4/zoom;
 			gc.fillOval(simulation.getPositionXInUnit(p) - diameter / 2, 
 					simulation.getPositionYInUnit(p) - diameter / 2, diameter, diameter);
 			
@@ -301,15 +303,14 @@ public class MainController {
 			return;
 	    }
 	    
-		double radius = 1 + simulation.getMassInUnit(p) / 100;
-		//System.out.println(p.getVelocityY()*10e8);
+		double radius = 1 + simulation.getRadiusInUnit(p);
 		
 		double arctan = Math.atan2( p.getVelocityY()*10e7, p.getVelocityX()*10e7 );
 		
 		double x1 = simulation.getPositionXInUnit(p) + (radius/2) *  Math.cos(arctan);
-		double x2 = x1 + simulation.getVelocityXInUnit(p)*10e6;
+		double x2 = x1 + simulation.getVelocityXInUnit(p)*1e5;
 		double y1 = simulation.getPositionYInUnit(p) + (radius/2) *  Math.sin(arctan);
-		double y2 = y1 + simulation.getVelocityYInUnit(p)*10e6;
+		double y2 = y1 + simulation.getVelocityYInUnit(p)*1e5;
 		
 	    gc.setLineWidth(0.05 * radius);
 	    gc.setLineCap(StrokeLineCap.ROUND);
